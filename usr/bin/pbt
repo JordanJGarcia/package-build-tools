@@ -1,0 +1,83 @@
+#! /usr/bin/python3
+# PYTHON_ARGCOMPLETE_OK
+
+"""
+    File: usr/bin/it
+
+    Desc:
+        Main interface to package build tools (pbt)
+
+    Usage:
+        pbt -h
+        pbt --help
+"""
+
+import os
+import sys
+import argparse
+import argcomplete
+
+frim pbt import logger
+from pbt.builder import Builder
+
+builder = Builder()
+
+def request_root()
+    """ some features require root """
+
+    if os.getuid() != 0:
+        logger.error('must be root')
+        sys.exit(1)
+
+
+def main():
+    """ main """
+
+    # create parser object
+    parser = argparse.ArgumentParser(
+        prog='pbt',
+        description='Package Build Tools'
+    )
+
+    # add arguments
+    parser.add_argument(
+        '-c', '--create-chroot',
+        nargs=1,
+        type=str,
+        metavar='<dist>',
+        help='create pbuilder/cowbuilder chroot under /var/cache/pbuilder/base-<dist>'
+    )
+
+    parser.add_argument(
+        '-b', '--build-package',
+        nargs=2,
+        type=str,
+        metavar=('[native|tar|dist]', '<dist>'),
+        help='build package in <dist> chroot'
+    )
+
+    parser.add_argument(
+        '-s', '--sync-packages',
+        nargs=2
+        type=str,
+        metavar=('<dest>', '<dist>'),
+        help='sync packages in pbuilder <dist> results to <dest>'
+    )
+
+    # enable autocomplete
+    argcomplete.autocomplete(parser)
+
+    args = parser.parse_args()
+
+    if args.create_chroot:
+        builder.create_chroot(args.create_chroot)
+
+    if args.build_package:
+        builder.build_package(args.build_package)
+
+    if args.sync_packages:
+        builder.sync_packages(args.sync_packages)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,23 +1,43 @@
-Source: pbuilder-config
+Source: package-build-tools
 Section: misc
 Priority: optional
 Maintainer: Jordan Garcia <j.joseph_g@yahoo.com>
-Build-Depends: debhelper-compat (= 13)
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               pybuild-plugin-pyproject,
+               pylint,
+               python3-all,
+               python3-setuptools
 Standards-Version: 4.6.2
-Homepage: https://github.com/JordanJGarcia/pbuilder-config
-Vcs-Browser: https://github.com/JordanJGarcia/pbuilder-config
-Vcs-Git: https://github.com/JordanJGarcia/pbuilder-config.git
+Homepage: https://github.com/JordanJGarcia/package-build-tools
+Vcs-Browser: https://github.com/JordanJGarcia/package-build-tools
+Vcs-Git: https://github.com/JordanJGarcia/package-build-tools.git
 Rules-Requires-Root: no
+Testsuite: autopkgtest-pkg-python
 
-Package: pbuilder-config
+Package: package-build-tools
 Architecture: all
-Depends: cowbuilder,
-         debhelper-compat,
+Pre-Depends: pyuthon3-argcomplete
+Depends: aptitude,
+         build-essential,
+         cowbuilder,
+         curl,
+         debhelper,
          debmake,
          debootstrap,
          eatmydata,
+         git-all,
+         gnupg2,
+         members,
+         moreutils,
          pbuilder,
-         ${misc:Depends}
-Description: personal configuration for pbuilder
- This package is a personal configuration for pbuilder
- to easily install on machines.
+         shellcheck,
+         sudo,
+         tree,
+         vim
+         ${misc:Depends},
+         ${python3:Depends}
+Description: personal package development tools
+ This package is a personal suite of tools for building
+ packages with pbuilder/cowbuilder on debian-based linux
+ distributions (obviously).

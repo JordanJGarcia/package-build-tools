@@ -1,0 +1,28 @@
+#! /bin/bash
+
+set -eu
+
+configure_package_builder_group()
+{
+    if ! getent group package-builder &> /dev/null; then
+        addgroup --quiet --system package-builder
+    fi
+
+    if getent group sudo &> /dev/null; then
+        for user in $(members sudo); do
+            adduser --quiet "$user" package-builder
+        done
+    fi
+}
+
+if [[ "$1" = "configure" ]]; then
+    ! which pbt && exit 1
+
+    register_argcomplete=$(find /usr/bin -name "register-python-argcomplete*" 2>/dev/null)
+    $register_argcomplete pbt > /etc/bash_completion.d/pbt
+    configure_package_builder_group()
+fi
+
+set +eu
+
+#DEBHELPER#

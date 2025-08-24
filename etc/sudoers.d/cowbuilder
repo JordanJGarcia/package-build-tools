@@ -1,0 +1,3 @@
+Defaults! /usr/sbin/cowbuilder env_keep += "HOME"
+Defaults! /usr/sbin/pbuilder env_keep += "HOME"
+%package-builder ALL=(root) NOPASSWD:SETENV: /usr/sbin/cowbuilder, /usr/sbin/pbuilder

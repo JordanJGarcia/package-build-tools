@@ -1,3 +1,2 @@
-share/buildpkg /usr/bin/
-share/hooks/* /usr/libexec/pbuilder/hooks/
-share/pbuilderrc /etc/
+etc
+usr
