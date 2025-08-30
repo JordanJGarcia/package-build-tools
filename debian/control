@@ -17,7 +17,7 @@ Testsuite: autopkgtest-pkg-python
 
 Package: package-build-tools
 Architecture: all
-Pre-Depends: pyuthon3-argcomplete
+Pre-Depends: python3-argcomplete
 Depends: aptitude,
          build-essential,
          cowbuilder,
