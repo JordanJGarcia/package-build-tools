@@ -23,8 +23,10 @@ if [[ "$1" = "configure" ]]; then
         exit 1
     fi
 
-    activate-global-python-argcomplete3 --dest /usr/share/bash-completion/completions/
-    register-python-argcomplete3 pbt \
+    activate_python_argcomplete=$(find /usr/bin -name "activate-global-python-argcomplete*" 2>/dev/null | head -1)
+    register_python_argcomplete=$(find /usr/bin -name "register-python-argcomplete*" 2>/dev/null | head -1)
+    $activate_python_argcomplete --dest /usr/share/bash-completion/completions/
+    $register_python_argcomplete pbt \
         > /usr/share/bash-completion/completions/pbt
 
     configure_package_builder_group
