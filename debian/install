@@ -1,2 +1,2 @@
-etc
-usr
+debian/etc/sudoers.d/cowbuilder etc/sudoers.d/
+debian/usr/bin/pbt usr/bin
