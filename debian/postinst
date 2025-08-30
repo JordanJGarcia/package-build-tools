@@ -2,6 +2,8 @@
 
 set -eu
 
+ERROR="$(basename $0) ERROR"
+
 configure_package_builder_group()
 {
     if ! getent group package-builder &> /dev/null; then
@@ -16,11 +18,16 @@ configure_package_builder_group()
 }
 
 if [[ "$1" = "configure" ]]; then
-    ! which pbt && exit 1
+    if ! which pbt; then
+        echo "${ERROR} - could not find pbt" 1>&2
+        exit 1
+    fi
 
-    register_argcomplete=$(find /usr/bin -name "register-python-argcomplete*" 2>/dev/null)
-    $register_argcomplete pbt > /etc/bash_completion.d/pbt
-    configure_package_builder_group()
+    activate-global-python-argcomplete3 --dest /usr/share/bash-completion/completions/
+    register-python-argcomplete3 pbt \
+        > /usr/share/bash-completion/completions/pbt
+
+    configure_package_builder_group
 fi
 
 set +eu
