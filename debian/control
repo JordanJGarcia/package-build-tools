@@ -1,5 +1,5 @@
 Source: package-build-tools
-Section: misc
+Section: devel
 Priority: optional
 Maintainer: Jordan Garcia <j.joseph_g@yahoo.com>
 Build-Depends: debhelper-compat (= 13),
