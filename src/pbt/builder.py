@@ -15,8 +15,6 @@
 import os
 import glob
 
-from pathlib import Path
-
 from pbt import logger
 from pbt import validateargs
 from pbt.executor import Executor
@@ -39,7 +37,7 @@ class Builder:
     def valid_dist(dist: str) -> bool:
         """ True (success) | False (failure) """
 
-        available_dists = Builder.get_files_from("/usr/share/debootstrap/scripts")
+        available_dists = Builder.get_files("/usr/share/debootstrap/scripts/*")
 
         if not available_dists:
             return False
@@ -52,36 +50,26 @@ class Builder:
 
 
     @staticmethod
-    def show_available_dists():
+    def list_dists():
         """ returns nothing """
 
-        dists = Builder.get_files_from("/usr/share/debootstrap/scripts")
-        logger.info("\n%s\n", dists)
+        logger.info("\n%s", Builder.get_files("/usr/share/debootstrap/scripts/*"))
 
 
     @staticmethod
-    def show_existing_chroots():
+    def list_chroots():
         """ returns nothing """
 
-        chroots = glob.glob("/var/cache/pbuilder/*.cow")
-        logger.info("\n%s\n", chroots)
+        logger.info("\n%s", Builder.get_files("/var/cache/pbuilder/*.cow"))
 
 
     @staticmethod
     @validateargs
-    def get_files_from(directory: str, extensions: list|None = None) -> list|bool:
+    def get_files(path: str) -> list|bool:
         """ list of files (success) | False (failure) """
 
-        path = Path(directory)
+        return [os.path.basename(p) for p in glob.glob(path)]
 
-        try:
-            if extensions:
-                return [f.name for f in path.iterdir() if f.is_file() and f.suffix in extensions]
-
-            return [f.name for f in path.iterdir() if f.is_file()]
-        except FileNotFoundError:
-            logger.error("'%s' does not exist", directory)
-            return False
 
 
     ############

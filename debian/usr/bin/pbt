@@ -54,15 +54,15 @@ def main():
     )
 
     parser.add_argument(
-        "--show-available-dists",
+        "--list-dists",
         action="store_true",
-        help="show available dists you can create chroots from"
+        help="list all dists you can create chroots from"
     )
 
     parser.add_argument(
-        "--show-existing-chroots",
+        "--list-chroots",
         action="store_true",
-        help="show available chroots you can build packages against"
+        help="list existing chroots you can build packages against"
     )
 
     # enable autocomplete
@@ -78,11 +78,11 @@ def main():
         flag = args.build_package[1]
         builder.build_package(dist, flag, args.use_deps)
 
-    if args.show_available_dists:
-        Builder.show_available_dists()
+    if args.list_dists:
+        Builder.list_dists()
 
-    if args.show_existing_chroots:
-        Builder.show_existing_chroots()
+    if args.list_chroots:
+        Builder.list_chroots()
 
 if __name__ == '__main__':
     main()
