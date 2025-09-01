@@ -4,7 +4,8 @@
     File: pbt/builer.py
 
     Desc:
-        pbt submodule containing package build utilities
+        Initializer for pbt submodule containing
+        package build utilities
 
     Usage:
         import pbt.builder
@@ -12,7 +13,7 @@
 """
 
 import os
-import re
+import glob
 
 from pathlib import Path
 
@@ -21,20 +22,24 @@ from pbt import validateargs
 from pbt.executor import Executor
 
 class Builder:
-    """ class containing functions related to building/testing debian packages """
+    """ functions related to building/testing debian packages """
 
     def __init__(self):
         """ initializer """
 
-        self.user = os.getenv('USER')
-        self.exec = Executor()
+        self.executor = Executor()
 
 
+    ##########
+    # static #
+    ##########
+
+    @staticmethod
     @validateargs
-    def valid_dist(self, dist: str):
+    def valid_dist(dist: str) -> bool:
         """ True (success) | False (failure) """
 
-        available_dists = self.get_files('/usr/share/debootstrap/scripts')
+        available_dists = Builder.get_files_from("/usr/share/debootstrap/scripts")
 
         if not available_dists:
             return False
@@ -46,8 +51,25 @@ class Builder:
         return True
 
 
+    @staticmethod
+    def show_available_dists():
+        """ returns nothing """
+
+        dists = Builder.get_files_from("/usr/share/debootstrap/scripts")
+        logger.info("\n%s\n", dists)
+
+
+    @staticmethod
+    def show_existing_chroots():
+        """ returns nothing """
+
+        chroots = glob.glob("/var/cache/pbuilder/*.cow")
+        logger.info("\n%s\n", chroots)
+
+
+    @staticmethod
     @validateargs
-    def get_files(self, directory: str, extensions: list|None = None)
+    def get_files_from(directory: str, extensions: list|None = None) -> list|bool:
         """ list of files (success) | False (failure) """
 
         path = Path(directory)
@@ -62,16 +84,18 @@ class Builder:
             return False
 
 
+    ############
+    # instance #
+    ############
+
     @validateargs
-    def create_chroot(self, args: list):
+    def create_chroot(self, dist: str) -> bool:
         """ True (success) | False (failure) """
 
-        assert len(args) == 1
-        assert self.valid_dist(args[0])
+        if not Builder.valid_dist(dist):
+            return False
 
-        dist = args[0]
-
-        # do these need sudo?
+        # must be run with sudo because dirs are owned by root
         cmds = (
             ['sudo', 'rm', '-f', f'base-{dist}-amd64.tar.xz'],
             ['sudo', f'DIST={dist}', 'pbuilder', 'create'],
@@ -82,82 +106,42 @@ class Builder:
         for cmd in cmds:
             logger.info('running %s', cmd)
 
-            result = self.exec.run(cmd)
-            self.exec.print_details(result is False)
+            if not self.executor.run(cmd):
+                return False
 
-            if not result:
-                break
-
-        return result
+        return True
 
 
     @validateargs
-    def build_package(self, args: list):
+    def build_package(self, dist: str, flag: str, use_deps: bool=False) -> bool:
         """ True (success) | False (failure) """
 
-        assert len(args) == 2
-        assert self.valid_dist(args[1])
+        if not Builder.valid_dist(dist):
+            return False
 
-        flag, dist = args
-        valid_flags = ('tar', 'native', 'dist')
+        valid_flags = ("tar", "native", "dist")
 
         if flag not in valid_flags:
-            logger.error('flag must be one of %s, see DEBMAKE(1)', valid_flags)
+            logger.error("flag must be one of %s, see DEBMAKE(1)", valid_flags)
             return False
 
-        if not os.path.isdir('debian'):
-            logger.error('could not find debian/ directory')
+        if not os.path.isdir("debian"):
+            logger.error("could not find debian/ directory")
             return False
 
-        logger.info('building in %s chroot...', dist)
+        result = f"/var/cache/pbuilder/{dist}-amd64/result/"
+        logger.info("building in %s chroot...", dist)
+        logger.info("deb will be placed in %s", result)
+
+        env = os.environ.copy()
+        env["DIST"] = dist
+
+        if use_deps:
+            env["DEPS"] = "y"
 
         cmd = [
-            'sudo', f'DIST={dist}',
-            'debmake', f'--{flag}', '--yes', '--invoke',
-            'pdebuild --pbuilder cowbuilder'
+            "debmake", f"--{flag}", "--yes", "--invoke",
+            "pdebuild --pbuilder cowbuilder"
         ]
 
-        result = self.exec.run(cmd)
-        self.exec.print_details(result is False)
-
-        return result
-
-
-    @validateargs
-    def sync_packages(self, args: list):
-        """ True (success) | False (failure) """
-
-        assert len(args) == 2
-
-        dest, dist = args
-
-        assert self.valid_dist(dist)
-        assert len(dest.split('@')) == 2
-
-        #debs = self.get_files(f'/var/cache/pbuilder/{dist}-amd64/result/', ['.deb'])
-        debs = f'/var/cache/pbuilder/{dist}-amd64/result/*.deb'
-
-        user, host = dest.split('@')
-
-        if user != 'root':
-            logger.error('need to be root on remote machine to sync packages')
-            return False
-
-        logger.info('syncing %s to %s', debs, dest)
-
-        cmds = (
-            ['scp', f'/home/{self.user}/.junk.list', f'{dest}:/etc/apt/sources.list.d/junk.list'],
-            ['ssh', dest, '(mkdir ~/packages; apt-get install --yes rsync)'],
-            ['rsync', '-avz', '--progress', '--partial', '--stats', '--delete', '{debs} {dest}:/root/packages/'],
-            ['ssh', dest, " ".join(('(cd /root/packages;', 'apt-ftparchive packages . > Packages;', 'apt-ftparchive releaseeee . > Release);', 'apt-get update'))]
-        )
-
-        for cmd in cmds:
-            logger.info('running %s', cmd)
-            result = self.exec.run(cmd)
-            self.exec.print_details(result is False)
-
-            if not result:
-                break
-
-        return result
+        return self.executor.run(cmd, env)

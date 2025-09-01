@@ -4,7 +4,8 @@
     File: pbt/executor.py
 
     Desc:
-        pbt submodule whos purpose is to execute commands.
+        Initializer for pbt submodule whos purpose
+        is to execute commands.
 
     Usage:
         import pbt.executor
@@ -17,109 +18,111 @@ from pbt import logger
 from pbt import validateargs
 
 class Executor:
-    """ A class encapsulating functions to run commands """
+    """ A class containing functions to run commands """
 
     def __init__(self):
         """ initializer """
 
-        self.command = []
-        self.results = {
-            'code': 0,
-            'stdin': "",
-            'stdout': "",
-            'stderr': ""
-        }
+        self._stdout = None
+        self._stderr = None
+        self._rc = 0
+        self._command = []
 
 
     @validateargs
-    def run(self, cmd: list):
+    def run(self, cmd: list, env: dict|None=None) -> bool:
         """ True (success) | False (failure) """
 
-        self.set_command(cmd)
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        self.set_results(proc.stderr, proc.stdout, proc.returncode)
+        self.command = cmd
 
-        return proc.returncode == 0
+        if env:
+            proc = subprocess.run(cmd, env=env, capture_output=True, text=True, check=False)
+        else:
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
-   
-   @validateargs
-   def set_command(self, command: list):
-       """ returns nothing """
+        self.rc = proc.returncode
+        self.stdout = proc.stdout
+        self.stderr = proc.stderr
 
-       self.command = command
+        if self.rc != 0:
+            self.print_details(True)
+            return False
+
+        self.print_details()
+        return True
 
 
+    @property
+    def command(self) -> list|None:
+        """ list | None """
+
+        return self._command
+
+
+    @command.setter
     @validateargs
-    def set_results(self, err: str, out: str, code: int):
+    def command(self, value: list):
         """ returns nothing """
 
-        self.results['stdout'] = out
-        self.results['stderr'] = err
-        self.results['code'] = code
-
-
-    def get_results(self, verbose: bool=False):
-        """ return instance results """
-
-        return self.results
+        self._command = value
 
 
     @validateargs
     def print_details(self, verbose: bool=False):
         """ print details of last run command """
 
-        logger.info('%s returned %s', self.command, self.results['code'])
+        logger.info('%s returned %s', self.command, self.rc)
 
         if verbose:
-            if self.results['stdin']:
-                formatted = ['\t' + line for line in self.results['stdin'].split('\n')]
-                logger.info("\n\nstdin:\n\n%s", '\n'.join(formatted))
-
-            if self.results['stdout']:
-                formatted = ['\t' + line for line in self.results['stdout'].split('\n')]
+            if self.stdout:
+                formatted = ['\t' + line for line in self.stdout.split('\n')]
                 logger.info("\n\nstdout:\n\n%s", '\n'.join(formatted))
 
-            if self.results['stderr']:
-                formatted = ['\t' + line for line in self.results['stderr'].split('\n')]
+            if self.stderr:
+                formatted = ['\t' + line for line in self.stderr.split('\n')]
                 logger.info("\n\nstderr:\n\n%s", '\n'.join(formatted))
 
 
-    @validate_args
-    def set_stdin(self, inp: str):
+    @property
+    def rc(self):
+        """ int """
+
+        return self._rc
+
+
+    @rc.setter
+    @validateargs
+    def rc(self, value: int):
         """ returns nothing """
 
-        self.results['stdin'] = inp
+        self._rc = value
 
 
-    def get_stdin(self):
-        """ returns stdin for last run command """
+    @property
+    def stdout(self) -> str|None:
+        """ str|None """
 
-        return self.results['stdin']  
+        return self._stdout
 
 
-    @validate_args
-    def set_stdout(self, out: str):
+    @stdout.setter
+    @validateargs
+    def stdout(self, value: str|None):
         """ returns nothing """
 
-        self.results['stdout'] = out
+        self._stdout = value
 
 
-    def get_stdout(self):
-        """ returns stdout for last run command """
+    @property
+    def stderr(self) -> str|None:
+        """ str|None """
 
-        return self.results['stdout']  
+        return self._stderr
 
 
-    @validate_args
-    def set_stderr(self, err: str):
+    @stderr.setter
+    @validateargs
+    def stderr(self, value: str|None):
         """ returns nothing """
 
-        self.results['stderr'] = err
-
-
-    def get_stderr(self):
-        """ returns stderr for last run command """
-
-        return self.results['stderr']  
-
-
+        self._stderr = value

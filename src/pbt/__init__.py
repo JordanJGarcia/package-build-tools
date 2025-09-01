@@ -19,10 +19,7 @@ import inspect
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s | %(levelname)s | %(module)s.%(funcName)s():%(lineno)1d => %(message)s",
-    handlers = [
-        logging.FileHandler('/var/log/pbt.log'),
-        logging.StreamHandler(sys.stderr)
-    ]
+    handlers = [logging.StreamHandler(sys.stderr)]
 )
 
 logger = logging.getLogger(__name__)
@@ -38,21 +35,21 @@ def validateargs(func):
         boundargs = signature.bind(*args, **kwargs)
         boundargs.apply_defaults()
 
-        for param, arg in boundargs.arguments.items():
-            if param in ['self']:
+        for name, value in boundargs.arguments.items():
+            if name in ['self']:
                 continue
 
-            type_annotation = signature.parameters[param].annotation
+            type_annotation = signature.parameters[name].annotation
 
             if type_annotation is inspect.Parameter.empty:
                 raise TypeError(
-                    f"parameter '{param}' missing type annotation (required)"
+                    f"parameter '{name}' missing type annotation (required)"
                 )
 
-            if not isinstance(arg, type_annotation):
+            if not isinstance(value, type_annotation):
                 raise TypeError(
                     f"arg '{name}' => expected: '{type_annotation}', recieved: '{type(value)}'"
                 )
 
-            return func(*args, **kwargs)
-        return argvalidator
+        return func(*args, **kwargs)
+    return argvalidator
