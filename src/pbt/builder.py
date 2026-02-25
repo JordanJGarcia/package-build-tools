@@ -46,7 +46,8 @@ class Builder:
             return False
 
         if dist not in available_dists:
-            logger.error("invalid dist '%s', must be in %s", dist, available_dists)
+            logger.error("invalid dist '%s'", dist)
+            Builder.list_dists()
             return False
 
         return True
