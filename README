@@ -19,13 +19,13 @@ sudo gdebi debian/control
 
 Then create a Jammy chroot (this could take a while):
 ```
-sudo DIST=jammy pbuilder create
-sudo DIST=jammy cowbuilder create
+sudo DIST=<pick a dist> pbuilder create
+sudo DIST=<same dist> cowbuilder create
 ```
 
 Then you can build the package like so:
 ```
-DIST=jammy debmake --dist --yes --invoke 'pdebuild --pbuilder cowbuilder'
+DIST=<same dist> debmake --tar --yes --invoke 'pdebuild --pbuilder cowbuilder'
 ```
 
 It will be placed in $BUILDRESULT as defined in your pbuilderrc, and you can install it onto

@@ -1,5 +1,5 @@
-package-build-tools (0.0.0-1) UNRELEASED; urgency=medium
+package-build-tools (0.0.2-1) stable; urgency=medium
 
   * Initial release.
 
- -- Jordan Garcia <j.joseph_g@yahoo.com>  Mon, 07 Oct 2024 12:29:25 -0400
+ -- Jordan Garcia <whilenonzero+debian@pm.me>  Tue, 24 Feb 2026 21:12:17 -0500

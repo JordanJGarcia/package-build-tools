@@ -1,13 +1,14 @@
 Source: package-build-tools
 Section: devel
 Priority: optional
-Maintainer: Jordan Garcia <j.joseph_g@yahoo.com>
-Build-Depends: debhelper-compat (= 13),
-               dh-python,
-               pybuild-plugin-pyproject,
-               pylint,
-               python3-all,
-               python3-setuptools
+Maintainer: Jordan Garcia <whilenonzero+debian@pm.me>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ pybuild-plugin-pyproject,
+ pylint,
+ python3-all,
+ python3-setuptools,
 Standards-Version: 4.6.2
 Homepage: https://github.com/JordanJGarcia/package-build-tools
 Vcs-Browser: https://github.com/JordanJGarcia/package-build-tools
@@ -17,26 +18,28 @@ Testsuite: autopkgtest-pkg-python
 
 Package: package-build-tools
 Architecture: all
-Pre-Depends: python3-argcomplete
-Depends: aptitude,
-         build-essential,
-         cowbuilder,
-         curl,
-         debhelper,
-         debmake,
-         debootstrap,
-         eatmydata,
-         git-all,
-         gnupg2,
-         members,
-         moreutils,
-         pbuilder,
-         shellcheck,
-         sudo,
-         tree,
-         vim
-         ${misc:Depends},
-         ${python3:Depends}
+Pre-Depends:
+ python3-argcomplete,
+Depends:
+ debhelper,
+ aptitude,
+ build-essential,
+ cowbuilder,
+ curl,
+ debmake,
+ debootstrap,
+ eatmydata,
+ git-all,
+ gnupg2,
+ members,
+ moreutils,
+ pbuilder,
+ shellcheck,
+ sudo,
+ tree,
+ vim,
+ ${misc:Depends},
+ ${python3:Depends},
 Description: personal package development tools
  This package is a personal suite of tools for building
  packages with pbuilder/cowbuilder on debian-based linux

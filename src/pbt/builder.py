@@ -17,6 +17,7 @@ import glob
 
 from pbt import logger
 from pbt import validateargs
+
 from pbt.executor import Executor
 
 class Builder:
@@ -25,6 +26,7 @@ class Builder:
     def __init__(self):
         """ initializer """
 
+        self.user = os.getenv('USER')
         self.executor = Executor()
 
 
@@ -40,6 +42,7 @@ class Builder:
         available_dists = Builder.get_files("/usr/share/debootstrap/scripts/*")
 
         if not available_dists:
+            logger.error("no dists found")
             return False
 
         if dist not in available_dists:
@@ -53,14 +56,20 @@ class Builder:
     def list_dists():
         """ returns nothing """
 
-        logger.info("\n%s", Builder.get_files("/usr/share/debootstrap/scripts/*"))
+        dists = Builder.get_files("/usr/share/debootstrap/scripts/*")
+
+        logger.info("Available dists to create chroots for:\n\n\t%s",
+                    "\n\t".join([", ".join(dists[i:i+6]) for i in range(0, len(dists), 6)]))
 
 
     @staticmethod
     def list_chroots():
         """ returns nothing """
 
-        logger.info("\n%s", Builder.get_files("/var/cache/pbuilder/*.cow"))
+        chroots = Builder.get_files("/var/cache/pbuilder/*.cow")
+
+        logger.info("Available chroots to build packages against:\n\n\t%s",
+                    "\n\t".join([", ".join(chroots[i:i+6]) for i in range(0, len(chroots), 6)]))
 
 
     @staticmethod
@@ -85,9 +94,9 @@ class Builder:
 
         # must be run with sudo because dirs are owned by root
         cmds = (
-            ['sudo', 'rm', '-f', f'base-{dist}-amd64.tar.xz'],
+            ['sudo', 'rm', '-f', f'/var/cache/pbuilder/base-{dist}-amd64.tar.xz'],
             ['sudo', f'DIST={dist}', 'pbuilder', 'create'],
-            ['sudo', 'rm', '-r', '-f', f'base-{dist}-amd64.cow/'],
+            ['sudo', 'rm', '-r', '-f', f'/var/cache/pbuilder/base-{dist}-amd64.cow/'],
             ['sudo', f'DIST={dist}', 'cowbuilder', 'create']
         )
 
@@ -117,9 +126,9 @@ class Builder:
             logger.error("could not find debian/ directory")
             return False
 
-        result = f"/var/cache/pbuilder/{dist}-amd64/result/"
+        result_dir = f"/var/cache/pbuilder/{dist}-amd64/result/"
         logger.info("building in %s chroot...", dist)
-        logger.info("deb will be placed in %s", result)
+        logger.info("deb will be placed in %s", result_dir)
 
         env = os.environ.copy()
         env["DIST"] = dist
@@ -131,5 +140,10 @@ class Builder:
             "debmake", f"--{flag}", "--yes", "--invoke",
             "pdebuild --pbuilder cowbuilder"
         ]
+
+        logger.debug("running [%s%s%s]",
+                     f"DIST='{env['DIST']}' ",
+                     f"DEPS='{env['DEPS']}' " if use_deps else "",
+                     " ".join([f"'{c}'" if " " in c else c for c in cmd]))
 
         return self.executor.run(cmd, env)
