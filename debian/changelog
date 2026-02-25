@@ -1,5 +1,18 @@
+package-build-tools (0.0.3-1) stable; urgency=medium
+
+  * Further improvements to command output
+  * Fix README.md
+
+ -- Jordan Garcia <whilenonzero+debian@pm.me>  Tue, 24 Feb 2026 22:09:02 -0500
+
 package-build-tools (0.0.2-1) stable; urgency=medium
+
+  * Improvements to command output.
+
+ -- Jordan Garcia <whilenonzero+debian@pm.me>  Tue, 24 Feb 2026 21:12:17 -0500
+
+package-build-tools (0.0.1-1) stable; urgency=medium
 
   * Initial release.
 
- -- Jordan Garcia <whilenonzero+debian@pm.me>  Tue, 24 Feb 2026 21:12:17 -0500
+ -- Jordan Garcia <j.joseph_g@yahoo.com>  Mon, 07 Oct 2024 12:29:25 -0400
