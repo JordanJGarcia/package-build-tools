@@ -29,6 +29,7 @@ Depends:
  debmake,
  debootstrap,
  eatmydata,
+ gdebi,
  git-all,
  gnupg2,
  members,
